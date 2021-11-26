@@ -20,7 +20,7 @@ $(OBJ_DIR)/driver.o: $(SRC_DIR)/driver.cpp
 	$(CC) -c $(CFLAGS) -o $@ $<	
 
 dir:
-	mkdir -p bin build
+	mkdir -p bin build results
 	
 clean: dir
 	$(RM) $(BIN_DIR)/*

@@ -218,7 +218,6 @@ int main(int argc, char const *argv[]) {
         std::cout << "Item " << std::setw(4) << i+1 << " de valor " << std::setw(4) << items[i] << " na bin " << std::setw(4) << s->items_bins[i] << std::endl;
     }
     std::cout << "Número de bins: " << s->k << std::endl;
-    std::cout << "Número de items: " << s->N << std::endl;    
     std::cout << "Tempo em nanosegundos: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count() << std::endl;
 
     delete[] items;
