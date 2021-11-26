@@ -1,10 +1,11 @@
-// next_fit.cpp
+// driver.cpp
 
 #include <chrono>
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <iomanip>
+#include <map>
 
 typedef struct Solution
 {
@@ -63,19 +64,42 @@ Solution* first_fit(size_t C, size_t N, size_t* items) {
     return s;
 }
 
+Solution* not_implemented(size_t C, size_t N, size_t* items) {
+    std::cout << "Não implementado ainda" << std::endl;
+    exit(1);
+}
+
 int main(int argc, char const *argv[]) {
-    if (argc != 2) {
-        std::cout << "O programa deve receber apenas o caminho para arquivo com os dados da instância." << std::endl;
+    if (argc != 3) {
+        std::cout << "O programa deve receber o caminho para arquivo com os dados da instância. Seguido da sigla de identificação do algoritmo a ser utilizado:" << std::endl;
+        std::cout << "NF, WF, FF, BF, NFD, FFD ou BFD" << std::endl;
         exit(1);
     }
     std::ifstream fileSource(argv[1]);
 
+    using pfunc = Solution* (*)(size_t, size_t, size_t*);
+    std::map<std::string, pfunc> funcMap; 
+
+    funcMap["NF"] = next_fit;
+    funcMap["WF"] = not_implemented;
+    funcMap["FF"] = first_fit;
+    funcMap["BF"] = not_implemented;
+    funcMap["NFD"] = not_implemented;
+    funcMap["FFD"] = not_implemented;
+    funcMap["BFD"] = not_implemented;
+
+    std::map<std::string, pfunc>::iterator it = funcMap.find(argv[2]);
+    if (it == funcMap.end()){
+        std::cout << "A sigla: '" << argv[2] << "' não é válida, por favor informe uma entre as seguintes:" << std::endl;
+        std::cout << "NF, WF, FF, BF, NFD, FFD ou BFD" << std::endl;
+        return 1;
+    }
     size_t N = 0;
     size_t C = 0;
     size_t* items = nullptr;
     if (!fileSource) {
         std::cerr << "Erro: Arquivo não pode ser aberto - " << argv[1] << std::endl;
-        exit(-1);
+        return 1;
     } else {
         fileSource >> N;
         fileSource >> C;
@@ -91,7 +115,7 @@ int main(int argc, char const *argv[]) {
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    Solution* s = first_fit(C, N, items);
+    Solution* s = it->second(C, N, items);
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
