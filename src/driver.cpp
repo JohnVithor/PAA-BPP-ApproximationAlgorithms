@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <iomanip>
 #include <map>
+#include <algorithm>
+#include <random>
 
 typedef struct Solution
 {
@@ -14,6 +16,12 @@ typedef struct Solution
     size_t* items_bins;
 } Solution;
 
+Solution* not_implemented(size_t C, size_t N, size_t* items) {
+    std::cout << "Não implementado ainda" << std::endl;
+    exit(1);
+}
+
+bool decreasing(size_t i, size_t j) { return (i>j); }
 
 Solution* next_fit(size_t C, size_t N, size_t* items) {
     Solution *s = new Solution;
@@ -31,6 +39,39 @@ Solution* next_fit(size_t C, size_t N, size_t* items) {
         S += items[i];
     }
     
+    return s;
+}
+
+Solution* worst_fit(size_t C, size_t N, size_t* items) {
+    Solution *s = new Solution;
+    s->k = 1;
+    s->N = N;
+    s->items_bins = new size_t[N];
+    size_t* S = new size_t[N];
+    std::fill_n(S,N,0);
+    size_t smallest_content_i = N;
+    size_t smallest_content = C;
+    for (size_t i = 0; i < N; ++i)
+    {
+        smallest_content_i = N;
+        smallest_content = C;
+        for (size_t j = 0; j < s->k; ++j)
+        {
+            if (S[j] + items[i] <= C && S[j] < smallest_content) {
+                smallest_content_i = j;
+                smallest_content = S[j];
+            }
+        }
+        if (smallest_content_i != N) {
+            S[smallest_content_i] += items[i];
+            s->items_bins[i] = smallest_content_i+1;
+        } else {
+            S[s->k] = items[i];
+            ++s->k;
+            s->items_bins[i] = s->k;
+        }
+    }
+    delete[] S;
     return s;
 }
 
@@ -64,15 +105,64 @@ Solution* first_fit(size_t C, size_t N, size_t* items) {
     return s;
 }
 
-Solution* not_implemented(size_t C, size_t N, size_t* items) {
-    std::cout << "Não implementado ainda" << std::endl;
-    exit(1);
+Solution* best_fit(size_t C, size_t N, size_t* items) {
+    Solution *s = new Solution;
+    s->k = 1;
+    s->N = N;
+    s->items_bins = new size_t[N];
+    size_t* S = new size_t[N];
+    std::fill_n(S,N,0);
+    size_t largest_content_i = N;
+    size_t largest_content = 0;
+    for (size_t i = 0; i < N; ++i)
+    {
+        largest_content_i = N;
+        largest_content = 0;
+        for (size_t j = 0; j < s->k; ++j)
+        {
+            if (S[j] + items[i] <= C && S[j] > largest_content) {
+                largest_content_i = j;
+                largest_content = S[j];
+            }
+        }
+        if (largest_content_i != N) {
+            S[largest_content_i] += items[i];
+            s->items_bins[i] = largest_content_i+1;
+        } else {
+            S[s->k] = items[i];
+            ++s->k;
+            s->items_bins[i] = s->k;
+        }
+    }
+    delete[] S;
+    return s;
+}
+
+Solution* next_fit_decreasing(size_t C, size_t N, size_t* items) {
+    std::sort(items, items+N, decreasing);
+    return next_fit(C, N, items);
+}
+
+Solution* worst_fit_decreasing(size_t C, size_t N, size_t* items) {
+    std::sort(items, items+N, decreasing);
+    return worst_fit(C, N, items);
+}
+
+Solution* first_fit_decreasing(size_t C, size_t N, size_t* items) {
+    std::sort(items, items+N, decreasing);
+    return first_fit(C, N, items);
+}
+
+Solution* best_fit_decreasing(size_t C, size_t N, size_t* items) {
+    std::sort(items, items+N, decreasing);
+    return best_fit(C, N, items);
 }
 
 int main(int argc, char const *argv[]) {
-    if (argc != 3) {
+    if (argc != 4) {
         std::cout << "O programa deve receber o caminho para arquivo com os dados da instância. Seguido da sigla de identificação do algoritmo a ser utilizado:" << std::endl;
-        std::cout << "NF, WF, FF, BF, NFD, FFD ou BFD" << std::endl;
+        std::cout << "NF, WF, FF, BF, NFD, WFD, FFD ou BFD" << std::endl;
+        std::cout << "E por fim a seed para realizar o shuffle dos elementos antes de aplicar o algoritmo escolhido (Os items já estão ordenados nos arquivos)" << std::endl;
         exit(1);
     }
     std::ifstream fileSource(argv[1]);
@@ -81,17 +171,18 @@ int main(int argc, char const *argv[]) {
     std::map<std::string, pfunc> funcMap; 
 
     funcMap["NF"] = next_fit;
-    funcMap["WF"] = not_implemented;
+    funcMap["WF"] = worst_fit;
     funcMap["FF"] = first_fit;
-    funcMap["BF"] = not_implemented;
-    funcMap["NFD"] = not_implemented;
-    funcMap["FFD"] = not_implemented;
-    funcMap["BFD"] = not_implemented;
+    funcMap["BF"] = best_fit;
+    funcMap["NFD"] = next_fit_decreasing;
+    funcMap["WFD"] = worst_fit_decreasing;
+    funcMap["FFD"] = first_fit_decreasing;
+    funcMap["BFD"] = best_fit_decreasing;
 
     std::map<std::string, pfunc>::iterator it = funcMap.find(argv[2]);
     if (it == funcMap.end()){
         std::cout << "A sigla: '" << argv[2] << "' não é válida, por favor informe uma entre as seguintes:" << std::endl;
-        std::cout << "NF, WF, FF, BF, NFD, FFD ou BFD" << std::endl;
+        std::cout << "NF, WF, FF, BF, NFD, WFD, FFD ou BFD" << std::endl;
         return 1;
     }
     size_t N = 0;
@@ -112,6 +203,8 @@ int main(int argc, char const *argv[]) {
         }
         fileSource.close();
     }
+
+    std::shuffle(items, items+N, std::default_random_engine(std::strtoul(argv[3], nullptr, 10)));
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
