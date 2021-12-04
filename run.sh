@@ -1,13 +1,13 @@
 #!/bin/bash
 tentativas=$1
-path_intancias=$2
+path_instances=$2
 seed=$3
 
 echo Algoritmo,Instancia,Tempo_Nanosegundos,N_bins
 
 for alg in NF WF FF BF NFD WFD FFD BFD
 do
-    files=$(ls $path_intancias)
+    files=$(ls $path_instances)
     for filename in $files
     do
         soma_tempos=0
@@ -15,7 +15,7 @@ do
         bins=0
         for tentativa in $(seq $tentativas)
         do
-            ./bin/driver $path_intancias$filename $alg $seed > ./results/$alg$filename$tentativa.txt
+            ./bin/driver $path_instances$filename $alg $seed > ./results/$alg$filename$tentativa.txt
             tempo=$(tail -1 ./results/$alg$filename$tentativa.txt)
             tempo="${tempo##* }"
             soma_tempos=$((soma_tempos + tempo))
