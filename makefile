@@ -13,6 +13,9 @@ all: dir driver
 debug: CFLAGS += -g -O0 -pg
 debug: driver
 
+otimize: CFLAGS += -ftracer -Ofast
+otimize: dir driver
+
 driver: $(OBJ_DIR)/driver.o
 	$(CC) $(CFLAGS) -o $(BIN_DIR)/$@ $^
 

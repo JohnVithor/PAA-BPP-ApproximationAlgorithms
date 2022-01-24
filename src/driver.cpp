@@ -107,7 +107,7 @@ Solution* first_fit(size_t C, size_t N, size_t* items) {
 
 Solution* best_fit(size_t C, size_t N, size_t* items) {
     Solution *s = new Solution;
-    s->k = 1;
+    s->k = 0;
     s->N = N;
     s->items_bins = new size_t[N];
     size_t* S = new size_t[N];
