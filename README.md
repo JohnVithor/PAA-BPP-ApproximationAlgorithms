@@ -1,4 +1,4 @@
-# PAA2021
+# PAA-BPP-ApproximationAlgorithms
 
 Use the command 'make' to compile the program
 
